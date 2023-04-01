@@ -1,0 +1,20 @@
+{
+
+  "manifest_version": 3,
+  "name": "APass-Browser",
+  "version": "0.1",
+
+  "description": "Enables APass to send Url, User & Password to browser to auto-login",
+
+  "icons": {
+    "48": "icons/icon_48x48.png",
+    "96": "icons/icon_96x96.png"
+  },
+
+  "host_permissions": [ "*://a-pass.de/*", "*://*.a-pass.de/*" ],
+  "permissions" : [ "webRequest", "webRequestBlocking" ],
+
+  "background": { 
+    "scripts": ["bg.js"]
+  }
+}
