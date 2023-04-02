@@ -11,8 +11,8 @@
     "96": "icons/icon_96x96.png"
   },
 
-  "host_permissions": [ "*://a-pass.de/*", "*://*.a-pass.de/*" ],
-  "permissions" : [ "webRequest", "webRequestBlocking" ],
+  "host_permissions": [ "*://a-pass.de/*", "*://*.a-pass.de/*", "<all_urls>" ],
+  "permissions" : [ "webRequest", "webRequestBlocking", "activeTab", "scripting" ],
 
   "background": { 
     "scripts": ["bg.js"]
