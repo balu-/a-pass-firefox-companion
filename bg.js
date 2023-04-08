@@ -34,7 +34,7 @@ async function logURL(requestDetails) {
                 //     document.body.style.border = "5px solid green";
                 //   },
                 // });
-                dataMap.set(redirect_url.host, {'user':"demo", 'pw':"123"});
+                dataMap.set(redirect_url.host, { 'user': hash_url.searchParams.get('user'), 'pw':hash_url.searchParams.get('pw')});
                 const past_url = redirect_url.href.substring(redirect_url.protocol.length-1)
                 await browser.scripting.registerContentScripts([{
                       id: "a-pass-content-"+redirect_url.host,
@@ -67,8 +67,8 @@ browser.runtime.onMessage.addListener(
   (data, sender, senderResponse) => {
     console.log("Call - "+sender.url);
 
-    console.log(data);
-    console.log(sender);
+    //console.log(data);
+    //console.log(sender);
     const redirect_url = new URL(sender.url);
     console.log("redirect "+redirect_url);
     //unregister
@@ -78,8 +78,8 @@ browser.runtime.onMessage.addListener(
     const dataObj = dataMap.get(redirect_url.host);
     dataMap.delete(redirect_url.host);
     console.log("dataMap");
-    console.log(dataMap);
-    console.log(dataObj);
+    //console.log(dataMap);
+    //console.log(dataObj);
     senderResponse({response: dataObj});
     return true;//dataObj;
     //todo send username & pw
