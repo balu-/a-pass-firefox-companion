@@ -1,89 +1,78 @@
-console.log("-- inside js file --");
-
-//map hostname -> obj
+//map url -> tab
 const dataMap = new Map();
 
-async function logURL(requestDetails) {
-    try {
-        if (requestDetails.type != "main_frame"){
-            console.log("ignore non main_frame");
-            return {};
-        }
-        console.log(requestDetails);
-        const tab_id = requestDetails.tabId;
-        const request_id = requestDetails.requestId;
-        console.log(`Requests: ${tab_id} - ${request_id}`);
-        const url = new URL(requestDetails.url);
-        console.log(`Loading: ${requestDetails.url}`);
-        //console.log(`url ${url}`)
-        const hash = url.hash.substring(1);
-        //console.log(`hash ${hash}`)
-        const hash_dec = decodeURI(hash)
-        //console.log(`hash_dec ${hash_dec}`)
-        const hash_url = new URL("https://addon.a-pass.de/?"+hash_dec);
-        //console.log(`hash_url ${hash_url}`)
-        if (hash_url.searchParams.get('url') != null){
-            const redirect_url = new URL(hash_url.searchParams.get('url'));
-            // preinject add
-             try {
-                // browser.scripting.executeScript({
-                //   target: {
-                //     tabId: tab_id,
-                //   },
-                //   func: () => {
-                //     document.body.style.border = "5px solid green";
-                //   },
-                // });
-                dataMap.set(redirect_url.host, { 'user': hash_url.searchParams.get('user'), 'pw':hash_url.searchParams.get('pw')});
-                const past_url = redirect_url.href.substring(redirect_url.protocol.length-1)
-                await browser.scripting.registerContentScripts([{
-                      id: "a-pass-content-"+redirect_url.host,
-                      js: ["in.js"],
-                      //url.protocol
-                      matches: [ "*"+past_url ],
-                }]);
-              } catch (err) {
-                console.error(`failed to execute script: ${err}`);
-              }
-            return { redirectUrl: hash_url.searchParams.get('url') };
-        } else {
-            console.log("Could not get url");
-            return { redirectUrl: "https://addon.a-pass.de/error" };
-        }
+console.log("-- inside js file --");
+
+const extensionId = chrome.runtime.id;
+
+function portDisconnect(p){
+    console.log('Disconnected from native app');
+    console.log(p);
+    if (p.error) {
+      console.log(`Disconnected due to an error: ${p.error.message}`);
     }
-    catch(err) {
-        console.log(err);
-        return { redirectUrl: "https://addon.a-pass.de/error" };
-    }
+    browser.tabs.create({
+              "url": "/no_connection.html"
+            });
+    port = undefined; //reset port
 }
 
-browser.webRequest.onBeforeRequest.addListener(
-  logURL,
-  {urls: ["*://a-pass.de/#*", "*://*.a-pass.de/#*"]},
-  ["blocking"]
-);
+function createPort() 
+{
+  var port = chrome.runtime.connectNative('apasscompanion');
+  port.onDisconnect.addListener(portDisconnect);
+  return port;
+}
 
-browser.runtime.onMessage.addListener(
-  (data, sender, senderResponse) => {
-    console.log("Call - "+sender.url);
+var port = createPort();
 
-    //console.log(data);
-    //console.log(sender);
-    const redirect_url = new URL(sender.url);
-    console.log("redirect "+redirect_url);
-    //unregister
-    browser.scripting.unregisterContentScripts({
-                      ids:[ "a-pass-content-"+redirect_url.host ]});
-    console.log("unregister");
-    const dataObj = dataMap.get(redirect_url.host);
-    dataMap.delete(redirect_url.host);
-    console.log("dataMap");
-    //console.log(dataMap);
-    //console.log(dataObj);
-    senderResponse({response: dataObj});
-    return true;//dataObj;
-    //todo send username & pw
-  }
-);
 
-console.log("- Installed -");
+/*
+Listen for messages from the app.
+*/
+port.onMessage.addListener((response) => {
+  console.log("Received: ");
+  console.log(response);
+  //remap obj to have only this entrys
+  const resp = { 'url': response['url'], 'user': response['user'], 'pw': response.pw };
+  // get tab 
+  const tab = dataMap.get(response['url']);
+  //delete tab from map
+  dataMap.delete(response['url']);
+  const makeItGreen = 'document.body.style.border = "5px solid green"';
+  //code: `window.browserpass.fillLogin(${JSON.stringify(request)});`,
+  const executing = browser.tabs.executeScript({
+    code: makeItGreen
+  });
+  //send user and pw to tab
+  browser.tabs.sendMessage(tab.id, resp);
+  //execution only works if in the same tab as the action
+});
+
+/*
+On a click on the browser action, send the app a message.
+*/
+browser.browserAction.onClicked.addListener(() => {
+  browser.tabs.query({currentWindow: true, active: true}).then((tabs) => {
+      let tab = tabs[0]; // Safe to assume there will only be one result
+      let url = new URL(tab.url); //tab.url;
+      url = url.origin;
+      console.log(url);
+      console.log("Sending: {'url': "+url+"}");
+      //safe tab to url
+      dataMap.set(url, tab);
+      if(port === undefined){
+        port = createPort(); //try to connect
+      }
+      try{
+        rPromise = port.postMessage({ "url": url });
+        const injectScript = browser.tabs.executeScript({
+          file: "in.js"
+        });
+        injectScript.then((result) => {console.log("done");}, (error) => { console.log("error"); console.log(error); });
+        
+      } catch(error){
+        console.error(error);
+      }
+  }, console.error)
+});

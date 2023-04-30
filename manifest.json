@@ -1,8 +1,8 @@
 {
 
-  "manifest_version": 3,
-  "name": "APass-Browser",
-  "version": "0.1",
+  "manifest_version": 2,
+  "name": "APassCompanion",
+  "version": "0.3",
 
   "description": "Enables APass to send Url, User & Password to browser to auto-login",
 
@@ -11,10 +11,21 @@
     "96": "icons/icon_96x96.png"
   },
 
-  "host_permissions": [ "*://a-pass.de/*", "*://*.a-pass.de/*", "<all_urls>" ],
-  "permissions" : [ "webRequest", "webRequestBlocking", "activeTab", "scripting" ],
+  //"host_permissions": [ "*://a-pass.de/*", "*://*.a-pass.de/*", "<all_urls>" ],
+  "permissions" : [ "nativeMessaging", "activeTab", "scripting" ],
 
   "background": { 
     "scripts": ["bg.js"]
+  },
+
+  "browser_specific_settings": {
+  "gecko": {
+    "id": "firefox-companion@a-pass.de",
+    "strict_min_version": "110.0"
   }
+}, 
+"browser_action": {
+    "default_icon": "icons/icon_96x96.png"
+  }
+
 }

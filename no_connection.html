@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>APass Password Manager Connection Issue</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+
+    .center-div {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      /*width: 50%;
+      height: 50%;*/
+      max-width: 800px;
+      background-color: #f1f1f1;
+      border: 1px solid black;
+      box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      font-size: 24px;
+      color: #333;
+      background-color: #fff;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+          border-radius: 5px;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+      p {
+        line-height: 1.5;
+        color: #666;
+      }
+      button {
+        background-color: #4CAF50;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 20px;
+        display: block;
+        margin: 0 auto;
+      }
+      button:hover {
+        background-color: #3e8e41;
+      }
+
+  @media (prefers-color-scheme: dark) {
+
+      body {
+      background-color: #222;
+      color: #fff;
+    }
+    .center-div {
+      background-color: #333;
+    }
+    h1 {
+      color: #ddd;
+    }
+    p {
+      color: #9ca3af;
+    }
+    ul {
+      color: #fff;
+    }
+
+    }
+  </style>
+</head>
+<body>
+  <div class="center-div">
+    <div class="container">
+        <h1>Can't connect to APass Application</h1>
+        <p>We're sorry, but the APass application can not be reached. The add-on needs to talk to the APass Application to work.</p>
+          <p>Please ensure that your password manager is running and Browser-Addon-Support is activated. If you don't to have APass installed, you can download it here.</p>
+          <button onclick="window.location.href='https://a-pass.de';">Download APass</button>
+      </div>
+  </div>
+</body>
+</html>
