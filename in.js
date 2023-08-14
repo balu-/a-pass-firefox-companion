@@ -5,16 +5,34 @@
    * it will do nothing next time.
    */
   if (window.hasRun) {
+  	console.log("already injected");
     return;
   }
   window.hasRun = true;
 
 function fillUserAndPassword(message){
+	console.log("Got Message");
 	// ensure the origin is the same, or ask the user for permissions to continue
     if (window.location.origin !== message['url']) {
-    	confirm("Origin miss match");
+    	confirm("Origin miss match - ignoring");
     } else {
-    	fillForm(message);
+    	if(message['action'] == "findForms"){
+    		forms = findForms()
+    		console.log("find forms:");
+    		console.log(forms);
+    		if (forms !== undefined) {
+    			//did find forms
+    			return Promise.resolve(true);
+    		} else {
+    			//did not find forms
+    			return Promise.resolve(false);
+    		}
+    	}else if(message['action'] == "alert"){
+    		alert("APass: "+message['message']);
+    	}
+    	else{
+    		fillForm(message);
+    	}
     }
 }
 browser.runtime.onMessage.addListener(fillUserAndPassword);
@@ -272,16 +290,22 @@ function fillForm(credentials){
 	console.log("fillForm");
     loginForm = findForms();
    	console.log(loginForm);
-    for(let form of loginForm){
-    	// fill login field
-        if ('user' in credentials){
-        	setFieldValue(USERNAME_FIELDS, credentials['user'], form);
-        }
-        // fill secret field
-        if ('pw' in credentials){
-            setFieldValue(PASSWORD_FIELDS, credentials['pw'], form)
-        }
-    }
+   	if (loginForm !== undefined) {
+	    for(let form of loginForm){
+	    	// fill login field
+	        if ('user' in credentials){
+	        	setFieldValue(USERNAME_FIELDS, credentials['user'], form);
+	        }
+	        // fill secret field
+	        if ('pw' in credentials){
+	            setFieldValue(PASSWORD_FIELDS, credentials['pw'], form)
+	        }
+	    }
+	} else {
+		console.log("Could not find Form");
+		alert("Could not find Form");
+		throw new Error("no Login Forms");
+	}
 }
 
 })();
